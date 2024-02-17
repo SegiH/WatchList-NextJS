@@ -68,23 +68,25 @@ const Tabs = ({ activeRoute, admin, defaultRoute, isLoggedIn, isLoggedInCheckCom
                }
 
                {isLoggedInCheckComplete && isLoggedIn && (
-                    <div className="tabBar">
+                    <div className="w-screen fixed bottom-0 bg-background/80 backdrop-blur-md border-t border-border">
+                      <div className="mx-auto max-w-4xl flex justify-between">
                          {Object.keys(routeList)
                               .filter((routeName) => routeList[routeName].RequiresAuth === true && routeName !== "Setup" && routeName !== "SearchIMDB" && (routeName !== "AdminConsole" || (routeName === "AdminConsole" && admin === true)))
                               .map((routeName, index) => {
                                    return (
-                                        <span key={index} className="tab">
-                                             <span className={`tabitem ${activeRoute === routeList[routeName].Name ? "active" : ""}`}>
-                                                  <span className={`clickable tabIcon`} onClick={() => tabClickHandler(routeList[routeName].Name)}>
+                                        <div key={index} className={`p-2 w-full sm:min-w-24 cursor-pointer border-t-2 border-white/0 ${activeRoute === routeList[routeName].Name ? "bg-foreground text-background " : ""}`} onClick={() => tabClickHandler(routeList[routeName].Name)}>
+                                             <div className="flex flex-col gap-1 justify-center items-center">
+                                                  <span className={`clickable flex justify-center items-center`}>
                                                        {routeList[routeName].Icon}
                                                   </span>
 
-                                                  <span className="tabLabel">{typeof routeList[routeName].DisplayName !== "undefined" ? routeList[routeName].DisplayName : routeList[routeName].Name}</span>
-                                             </span>
-                                        </span>
+                                                  <span className="text-xs">{typeof routeList[routeName].DisplayName !== "undefined" ? routeList[routeName].DisplayName : routeList[routeName].Name}</span>
+                                             </div>
+                                        </div>
                                    );
                               })
                          }
+                         </div>
                     </div>
                )}
           </>

@@ -18,7 +18,7 @@ const app = express();
 
 // Constants
 const DBType = "SQLite";
-const DBFile = "watchlistdb.sqlite";
+const DBFile = "watchlistdb.sqlite.demo";
 const PORT = config.has(`Port`) ? config.get(`Port`) : 8080;
 const HOST = "0.0.0.0";
 //const Op = Sequelize.Op;

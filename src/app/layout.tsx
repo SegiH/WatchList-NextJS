@@ -1,4 +1,11 @@
 import type { Metadata } from 'next';
+import './globals.css'
+
+import { cn } from '@/lib/utils';
+import { ThemeProvider } from '@/components/theme-provider';
+ 
+import { fontSans } from '@/lib/utils';
+
 
 export const metadata: Metadata = {
      title: 'WatchList',
@@ -19,7 +26,21 @@ export default function RootLayout({
 
                     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossOrigin="anonymous"></link>
                </head>
-               <body>{children}</body>
+               <body className={cn(
+          "min-h-screen bg-background font-sans antialiased overflow-x-hidden",
+          fontSans.variable
+        )}>
+          
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+          
+          </body>
           </html>
      )
 }

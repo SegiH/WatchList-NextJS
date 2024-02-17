@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+
 const exact = require("prop-types-exact");
 const IWatchListItem = require("./interfaces/IWatchListItem");
 const IWatchListSortColumn = require("./interfaces/IWatchListSortColumn");
@@ -124,9 +127,18 @@ const WatchListItems = ({ AddIcon, archivedVisible, BrokenImageIcon, CancelIcon,
 
      return (
           <>
-               <span className="clickable customTopMargin" onClick={() => openDetailClickHandler(-1)}>
-                    {AddIcon}
-               </span>
+      <div className="flex sticky w-screen bg-background/80 backdrop-blur-md gap-4 justify-between items-center px-4 py-6">
+        {/* The screen title */}
+        <div className="text-3xl md:text-4xl font-bold text-foreground w-full">
+                  My List
+                </div>
+                
+                    
+                         
+                         <Button className="" onClick={() => openDetailClickHandler(-1)}>Add New <Plus className="ml-1 w-4 h-4"/></Button>
+                 
+              
+              </div>
 
                <ul className="clickable show-list">
                     {watchListItems?.filter(
