@@ -9,7 +9,7 @@ import User from "../../app/interfaces/IUser";
 // Constants
 export let DBType = config.has(`SQLite.username`) ? "SQLite" : config.has(`SQLServer.username`) ? "SQLServer" : "";
 
-export const DBFile = "watchlistdb.sqlite";
+export const DBFile = "watchlistdb.sqlite.demo";
 
 const defaultSources = ['Amazon', 'Hulu', 'Movie Theatre', 'Netflix', 'Plex', 'Prime', 'Web'];
 const defaultTypes = ['Movie', 'Other', 'Special', 'TV'];

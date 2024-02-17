@@ -7,25 +7,57 @@ const PropTypes = require("prop-types");
 const React = require("react");
 const useState = require("react").useState;
 
-const SearchIMDB = ({ AddIcon, autoAdd, BrokenImageIcon, searchCount, searchVisible, setNewWatchListItemDtlID, setSearchVisible, setWatchListItemsLoadingStarted, setWatchListItemsLoadingComplete }
-     :
-     {
-          AddIcon: typeof MuiIcon,
-          autoAdd: boolean,
-          BrokenImageIcon: typeof MuiIcon,
-          searchCount: number,
-          searchVisible: boolean,
-          setSearchVisible: (arg0: boolean) => void,
-          setNewWatchListItemDtlID: (arg0: number) => void,
-          setWatchListItemsLoadingStarted: (arg0: boolean) => void,
-          setWatchListItemsLoadingComplete: (arg0: boolean) => void
-     }) => {
+import { Button } from "@/components/ui/button";
+import {
+     Dialog,
+     DialogContent,
+     DialogDescription,
+     DialogFooter,
+     DialogHeader,
+     DialogTitle,
+     DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Plus, Search } from "lucide-react";
+import { useEffect } from "react";
+const IWatchListItem = require("./interfaces/IWatchListItem");
+
+const SearchIMDB = ({
+     BrokenImageIcon,
+     searchCount,
+     setActiveRoute,
+     setNewWatchListItemDtlID,
+     setSearchVisible,
+     setWatchListItemsLoadingStarted,
+     setWatchListItemsLoadingComplete,
+     watchListItems,
+}: {
+     BrokenImageIcon: typeof MuiIcon;
+     searchCount: number;
+     setActiveRoute: (arg0: string) => void;
+     setSearchVisible: (arg0: boolean) => void;
+     setNewWatchListItemDtlID: (arg0: number) => void;
+     setWatchListItemsLoadingStarted: (arg0: boolean) => void;
+     setWatchListItemsLoadingComplete: (arg0: boolean) => void;
+     watchListItems: typeof IWatchListItem,
+}) => {
      const [searchResults, setSearchResults] = useState({});
      const [searchSubmitted, setSearchSubmitted] = useState(false);
      const [searchTerm, setSearchTerm] = useState("");
+     const [watchlistSearchResults, setWatchlistSearchResults] = useState({});
+     const [watchlistSearchSubmitted, setWatchlistSearchSubmitted] = useState(false);
+
+     const addExistingResultClickHandler = (watchListItemID: number) => {
+          setNewWatchListItemDtlID(watchListItemID);
+
+          setIsSearchDialogOpen(false);
+
+          setActiveRoute("WatchList");
+     }
 
      const addSearchResultClickHandler = (index: number) => {
-          let itemType = 0; ``
+          let itemType = 0;
+          ``;
 
           if (searchResults[index].Type === "movie") {
                itemType = 1;
@@ -47,19 +79,20 @@ const SearchIMDB = ({ AddIcon, autoAdd, BrokenImageIcon, searchCount, searchVisi
 
           paramStr += `&IMDB_Poster=${searchResults[index].Poster}`;
 
-          axios.put(paramStr)
+          axios
+               .put(paramStr)
                .then((res: typeof ISearchImdb) => {
                     if (res.data[0] === "ERROR") {
-                         alert(`The error ${res.data[1]} occurred while adding the search result`);
+                         alert(
+                              `The error ${res.data[1]} occurred while adding the search result`
+                         );
                     } else if (res.data[0] === "ERROR-ALREADY-EXISTS") {
                          alert(res.data[1]);
                     } else {
                          setWatchListItemsLoadingStarted(false);
                          setWatchListItemsLoadingComplete(false);
 
-                         if (autoAdd) {
-                              setNewWatchListItemDtlID(res.data[1]);
-                         }
+                         setNewWatchListItemDtlID(res.data[1]);
 
                          // Remove this item from the the search results since its been added
                          const newSearchResults = Object.assign([], searchResults);
@@ -68,7 +101,9 @@ const SearchIMDB = ({ AddIcon, autoAdd, BrokenImageIcon, searchCount, searchVisi
                     }
                })
                .catch((err: Error) => {
-                    alert(`The error ${err.message} occurred while adding the search result`);
+                    alert(
+                         `The error ${err.message} occurred while adding the search result`
+                    );
                });
      };
 
@@ -77,106 +112,193 @@ const SearchIMDB = ({ AddIcon, autoAdd, BrokenImageIcon, searchCount, searchVisi
      };
 
      const onKeyUpHandler = (event: typeof GridEventListener) => {
-          if (event.key === "Enter") {
+          //if (event.key === "Enter") {
+          setTimeout(() => {
                searchTermHandler();
-          }
+          }, 1000); // Delay of 1000 milliseconds (1 second)
+          //}
      };
 
      const searchTermHandler = () => {
           if (searchTerm === "") {
-               alert("Please enter a search term");
+               //alert("Please enter a search term");
                return;
           }
 
-          axios.get(`/api/SearchIMDB?SearchTerm=${searchTerm}&SearchCount=${searchCount}`)
-               .then((res: typeof ISearchImdb) => {
-                    if (res.data[0] === "ERROR") {
-                         alert(`The error ${res.data[1]} occurred while  searching IMDB`);
-                    } else {
-                         setSearchResults(res.data[1]);
-                         setSearchSubmitted(true);
-                    }
-               })
-               .catch((err: Error) => {
-                    alert(`The error ${err.message} occurred while searching IMDB`);
-               });
+          // Search existing WatchListItems
+          const newWatchListItems: typeof IWatchListItem = Object.assign([], watchListItems);
+
+          const currentWatchListItemsResult = newWatchListItems?.filter((currentWatchListItem: typeof IWatchListItem) => {
+               return currentWatchListItem.WatchListItemName.toString().toUpperCase().includes(String(searchTerm).toUpperCase());
+          });
+
+          if (currentWatchListItemsResult.length > 0) {
+               setWatchlistSearchResults(currentWatchListItemsResult);
+          }
+
+          //setWatchlistSearchSubmitted(true);
+
+          /*axios
+            .get(
+              `/api/SearchIMDB?SearchTerm=${searchTerm}&SearchCount=${searchCount}`
+            )
+            .then((res: typeof ISearchImdb) => {
+              if (res.data[0] === "ERROR") {
+                alert(`The error ${res.data[1]} occurred while  searching IMDB`);
+              } else {
+                setSearchResults(res.data[1]);
+                setSearchSubmitted(true);
+              }
+            })
+            .catch((err: Error) => {
+              alert(`The error ${err.message} occurred while searching IMDB`);
+            });*/
      };
 
-     return (
-          <div className="modal">
-               <div className={`modal-content ${searchSubmitted === true ? "" : "customModalHeight"}`}>
-                    <div className="container searchHeader sticky">
-                         <div className="cards searchHeader">
-                              <div className="card leftMargin searchLabel">Search</div>
-                              <div className="card leftMargin searchMarginTop unsetcardwidth">
-                                   {/* Credit to https://codepen.io/menelaosly/pen/rZddyb */}
-                                   <div className="searchContainer">
-                                        <input type="search" className="searchInput" onChange={(event) => setSearchTerm(event.target.value)} onKeyUp={(event) => onKeyUpHandler(event)}/>
-                                        <i className="fa fa-search"></i>
-                                   </div>
-                                   {/*<input className="customBorderRadius customWidth" autoFocus={true} value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} onKeyUp={(event) => onKeyUpHandler(event)} />*/}
-                              </div>
+     // State to control the opening of the dialog
+     const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
 
-                              <div className="card rightAligned customCloseButton searchMarginTop">
-                                   <span className="clickable closeButton" onClick={closeSearch}>
-                                        X
-                                   </span>
+     // Function to toggle the dialog's open state
+     const toggleSearchDialog = () => setIsSearchDialogOpen(!isSearchDialogOpen);
+
+     useEffect(() => {
+         setWatchlistSearchResults([]);
+     }, []);
+
+     return (
+          <>
+
+               <Dialog open={isSearchDialogOpen} onOpenChange={setIsSearchDialogOpen}>
+                    <DialogTrigger asChild>
+                         <Button variant="outline" size="icon">
+                              <Search />
+                         </Button>
+                    </DialogTrigger>
+                    <DialogContent className="transition-all w-full sm:max-w-[425px] md:min-w-[768px] max-h-[80vh] overflow-y-hidden">
+                         <DialogHeader>
+                              <DialogTitle>Search for a Movie or Show</DialogTitle>
+                         </DialogHeader>
+
+                         <div className="search-box mt-6 bg-background w-full">
+                              <div className={` ${searchSubmitted === true ? "" : ""}`}>
+                                   <div className="flex w-full items-center space-x-2">
+                                        <div className="flex-1">
+                                             <Input
+                                                  type="search"
+                                                  placeholder="e.g. Anchorman or The Office"
+                                                  onChange={(event) => setSearchTerm(event.target.value)}
+                                                  onKeyUp={(event) => onKeyUpHandler(event)}
+                                             />
+                                        </div>
+                                        {/* <Button>Search</Button> */}
+                                   </div>
                               </div>
                          </div>
-                    </div>
+                         <div className="transition-all search-results max-h-[500px] overflow-y-scroll overflow-x-hidden mt-4">
+                              <div className="w-full divide-y divide-border overflow-x-hidden">
+                                   <div className="transition-all divide-y divide-border bg-background flex flex-col justify-center overflow-x-hidden">
+                                        {watchlistSearchResults && watchlistSearchResults.length > 0 &&
+                                             watchlistSearchResults.map(
+                                                  (currentResult: typeof IWatchListItem, index: number) => {
+                                                       return (
+                                                            <div key={index} className="flex items-center">
+                                                                 {currentResult.IMDB_Poster && (
+                                                                      // The poster column
+                                                                      <div className="whitespace-nowrap py-5 pl-4 pr-1 text-sm sm:pl-0 min-w-16 flex justify-center">
+                                                                           <img
+                                                                                className="aspect-[4/6] w-28"
+                                                                                src={currentResult.IMDB_Poster}
+                                                                                alt={currentResult.WatchListItemName}
+                                                                           />
+                                                                      </div>
+                                                                 )}
 
-                    <table className="datagrid">
-                         <tbody className="data watchList">
-                              {searchResults.length > 0 &&
-                                   searchResults.map((currentResult: typeof ISearchImdb, index: number) => {
-                                        return (
-                                             <tr key={index}>
-                                                  <td className="row">
-                                                       <span className="searchResult">
-                                                            <span className="addSearchResultIcon" onClick={(event) => addSearchResultClickHandler(index)}>{AddIcon}</span>
+                                                                 <div className="whitespace-nowrap px-3 py-5 text-sm flex-1">
+                                                                      <span className="text-base md:text-lg font-medium text-pretty">
+                                                                           {currentResult.WatchListItemName}
+                                                                      </span>
+                                                                 </div>
 
-                                                            {currentResult.Poster !== "N/A" && (
-                                                                 <>
-                                                                      <span className="textLabel">
+                                                                 <div className="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                                                      <span
+                                                                           className="addSearchResultIcon"
+                                                                           onClick={(event) =>
+                                                                                addExistingResultClickHandler(currentResult.WatchListItemID)
+                                                                           }
+                                                                      >
+                                                                           <Button size="icon" variant="outline">
+                                                                                <Plus />
+                                                                           </Button>
+                                                                      </span>
+                                                                 </div>
+                                                            </div>
+                                                       )
+                                                  })
+                                        }
+
+                                        {searchResults.length > 0 &&
+                                             searchResults.map(
+                                                  (currentResult: typeof ISearchImdb, index: number) => {
+                                                       return (
+                                                            <div key={index} className="flex items-center">
+                                                                 {currentResult.Poster !== "N/A" && (
+                                                                      // The poster column
+                                                                      <div className="whitespace-nowrap py-5 pl-4 pr-1 text-sm sm:pl-0 min-w-16 flex justify-center">
+                                                                           <img
+                                                                                className="aspect-[4/6] w-28"
+                                                                                src={currentResult.Poster}
+                                                                                alt={currentResult.Title}
+                                                                           />
+                                                                      </div>
+                                                                 )}
+
+                                                                 {currentResult.Poster == "N/A" && (
+                                                                      <img
+                                                                           className="aspect-[4/6] w-24"
+                                                                           src={BrokenImageIcon}
+                                                                           alt={currentResult.Title}
+                                                                      />
+                                                                 )}
+
+                                                                 <div className="whitespace-nowrap px-3 py-5 text-sm flex-1">
+                                                                      <span className="text-base md:text-lg font-medium text-pretty">
                                                                            {currentResult.Title} ({currentResult.Year})
                                                                       </span>
-
-                                                                      <img className="searchResultPoster" src={currentResult.Poster} alt={currentResult.Title} />
-                                                                 </>
-                                                            )}
-
-                                                            {currentResult.Poster === "N/A" && (
-                                                                 <>
-                                                                      <span className="textLabel">
-                                                                           {currentResult.Title} ({currentResult.Year})
+                                                                 </div>
+                                                                 <div className="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                                                      <span
+                                                                           className="addSearchResultIcon"
+                                                                           onClick={(event) =>
+                                                                                addSearchResultClickHandler(index)
+                                                                           }
+                                                                      >
+                                                                           <Button size="icon" variant="outline">
+                                                                                <Plus />
+                                                                           </Button>
                                                                       </span>
-
-                                                                      <img className="searchResultPoster" src={BrokenImageIcon} alt={currentResult.Title} />
-                                                                 </>
-                                                            )}
-                                                       </span>
-                                                  </td>
-                                             </tr>
-                                        );
-                                   })
-                              }
-                         </tbody>
-                    </table>
-               </div>
-          </div >
+                                                                 </div>
+                                                            </div>
+                                                       );
+                                                  }
+                                             )}
+                                   </div>
+                              </div>
+                         </div>
+                    </DialogContent>
+               </Dialog>
+          </>
      );
 };
 
 SearchIMDB.propTypes = exact({
-     AddIcon: PropTypes.object.isRequired,
-     autoAdd: PropTypes.bool.isRequired,
      BrokenImageIcon: PropTypes.object.isRequired,
      searchCount: PropTypes.number.isRequired,
-     searchVisible: PropTypes.bool.isRequired,
+     setActiveRoute: PropTypes.func.isRequired,
      setNewWatchListItemDtlID: PropTypes.func.isRequired,
      setSearchVisible: PropTypes.func.isRequired,
      setWatchListItemsLoadingStarted: PropTypes.func.isRequired,
      setWatchListItemsLoadingComplete: PropTypes.func.isRequired,
+     watchListItems: PropTypes.array.isRequired,
 });
 
 export default SearchIMDB;

@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { useCallback } from "react";
 
 const exact = require("prop-types-exact");
@@ -13,9 +15,7 @@ const useState = require("react").useState;
 const WatchListDetail = require("./WatchListDetail").default;
 
 const WatchList = ({
-     AddIcon,
      archivedVisible,
-     autoAdd,
      BrokenImageIcon,
      CancelIcon,
      demoMode,
@@ -45,62 +45,63 @@ const WatchList = ({
      watchListSortDirection,
      watchListSortingComplete,
      watchListSources,
-     watchListTypes
-}
-     :
-     {
-          AddIcon: typeof MuiIcon,
-          archivedVisible: boolean,
-          autoAdd: boolean,
-          BrokenImageIcon: typeof MuiIcon,
-          CancelIcon: typeof MuiIcon,
-          demoMode: boolean,
-          isAdding: boolean,
-          EditIcon: typeof MuiIcon,
-          isEditing: boolean,
-          isLoggedIn: boolean,
-          newWatchListItemDtlID: number,
-          ratingMax: number,
-          SaveIcon: typeof MuiIcon,
-          searchTerm: string,
-          setActiveRoute: (arg0: string) => void,
-          setIsAdding: (arg0: boolean) => void,
-          setIsEditing: (arg0: boolean) => void,
-          setNewWatchListItemDtlID: (arg0: number) => void,
-          setWatchList: (arg0: typeof IWatchList) => void,
-          setWatchListLoadingComplete: (arg0: boolean) => void,
-          setWatchListLoadingStarted: (arg0: boolean) => void,
-          setWatchListSortingComplete: (arg0: boolean) => void,
-          stillWatching: boolean,
-          sourceFilter: string,
-          typeFilter: string,
-          watchList: typeof IWatchList,
-          watchListItems: typeof IWatchListItem,
-          watchListLoadingComplete: boolean,
-          watchListSortColumn: string,
-          watchListSortDirection: string,
-          watchListSortingComplete: boolean,
-          watchListSources: typeof IWatchListSource,
-          watchListTypes: typeof IWatchListType
-     }) => {
+     watchListTypes,
+}: {
+     archivedVisible: boolean;
+     BrokenImageIcon: typeof MuiIcon;
+     CancelIcon: typeof MuiIcon;
+     demoMode: boolean;
+     isAdding: boolean;
+     EditIcon: typeof MuiIcon;
+     isEditing: boolean;
+     isLoggedIn: boolean;
+     newWatchListItemDtlID: number;
+     ratingMax: number;
+     SaveIcon: typeof MuiIcon;
+     searchTerm: string;
+     setActiveRoute: (arg0: string) => void;
+     setIsAdding: (arg0: boolean) => void;
+     setIsEditing: (arg0: boolean) => void;
+     setNewWatchListItemDtlID: (arg0: number) => void;
+     setWatchList: (arg0: typeof IWatchList) => void;
+     setWatchListLoadingComplete: (arg0: boolean) => void;
+     setWatchListLoadingStarted: (arg0: boolean) => void;
+     setWatchListSortingComplete: (arg0: boolean) => void;
+     stillWatching: boolean;
+     sourceFilter: string;
+     typeFilter: string;
+     watchList: typeof IWatchList;
+     watchListItems: typeof IWatchListItem;
+     watchListLoadingComplete: boolean;
+     watchListSortColumn: string;
+     watchListSortDirection: string;
+     watchListSortingComplete: boolean;
+     watchListSources: typeof IWatchListSource;
+     watchListTypes: typeof IWatchListType;
+}) => {
      const [watchListDtlID, setWatchListDtlID] = useState(null);
 
-     const openDetailClickHandler = useCallback((watchListID: number) => {
-          if (watchListID !== null) {
-               if (watchListID === -1) {
-                    setIsAdding(true);
-               }
+     const openDetailClickHandler = useCallback(
+          (watchListID: number) => {
+               if (watchListID !== null) {
+                    if (watchListID === -1) {
+                         setIsAdding(true);
+                    }
 
-               setWatchListDtlID(watchListID);
-          }
-     }, [setIsAdding]);
+                    setWatchListDtlID(watchListID);
+               }
+          },
+          [setIsAdding]
+     );
 
      const showDefaultSrc = (watchListID: number) => (): void => {
           const newWatchList = Object.assign([], watchList);
 
-          const currentWatchListResult = newWatchList?.filter((currentWatchList: typeof IWatchList) => {
-               return String(currentWatchList.WatchListID) === String(watchListID);
-          });
+          const currentWatchListResult = newWatchList?.filter(
+               (currentWatchList: typeof IWatchList) => {
+                    return String(currentWatchList.WatchListID) === String(watchListID);
+               }
+          );
 
           if (currentWatchListResult === 0) {
                // this shouldn't ever happen!
@@ -115,10 +116,10 @@ const WatchList = ({
      };
 
      useEffect(() => {
-          if (watchListDtlID === null && newWatchListItemDtlID !== null && autoAdd) {
+          if (watchListDtlID === null && newWatchListItemDtlID !== null) {
                openDetailClickHandler(-1);
           }
-     }, [autoAdd, newWatchListItemDtlID, openDetailClickHandler, watchListDtlID]);
+     }, [newWatchListItemDtlID, openDetailClickHandler, watchListDtlID]);
 
      useEffect(() => {
           if (!watchListSortingComplete && watchListLoadingComplete) {
@@ -127,16 +128,42 @@ const WatchList = ({
                newWatchList.sort((a: typeof IWatchList, b: typeof IWatchList) => {
                     switch (watchListSortColumn) {
                          case "ID":
-                              return parseInt(a.WatchListID) > parseInt(b.WatchListID) ? (watchListSortDirection === "ASC" ? 1 : -1) : watchListSortDirection === "ASC" ? -1 : 1;
+                              return parseInt(a.WatchListID) > parseInt(b.WatchListID)
+                                   ? watchListSortDirection === "ASC"
+                                        ? 1
+                                        : -1
+                                   : watchListSortDirection === "ASC"
+                                        ? -1
+                                        : 1;
                          case "Name":
                               const aName = a.WatchListItem.WatchListItemName;
                               const bName = b.WatchListItem.WatchListItemName;
 
-                              return String(aName) > String(bName) ? (watchListSortDirection === "ASC" ? 1 : -1) : watchListSortDirection === "ASC" ? -1 : 1;
+                              return String(aName) > String(bName)
+                                   ? watchListSortDirection === "ASC"
+                                        ? 1
+                                        : -1
+                                   : watchListSortDirection === "ASC"
+                                        ? -1
+                                        : 1;
                          case "StartDate":
-                              return parseFloat(new Date(a.StartDate).valueOf().toString()) > parseFloat(new Date(b.StartDate).valueOf().toString()) ? (watchListSortDirection === "ASC" ? 1 : -1) : watchListSortDirection === "ASC" ? -1 : 1;
+                              return parseFloat(new Date(a.StartDate).valueOf().toString()) >
+                                   parseFloat(new Date(b.StartDate).valueOf().toString())
+                                   ? watchListSortDirection === "ASC"
+                                        ? 1
+                                        : -1
+                                   : watchListSortDirection === "ASC"
+                                        ? -1
+                                        : 1;
                          case "EndDate":
-                              return parseFloat(new Date(a.EndDate).valueOf().toString()) > parseFloat(new Date(b.EndDate).valueOf().toString()) ? (watchListSortDirection === "ASC" ? 1 : -1) : watchListSortDirection === "ASC" ? -1 : 1;
+                              return parseFloat(new Date(a.EndDate).valueOf().toString()) >
+                                   parseFloat(new Date(b.EndDate).valueOf().toString())
+                                   ? watchListSortDirection === "ASC"
+                                        ? 1
+                                        : -1
+                                   : watchListSortDirection === "ASC"
+                                        ? -1
+                                        : 1;
                     }
                });
 
@@ -147,78 +174,149 @@ const WatchList = ({
 
      return (
           <>
-               {isLoggedIn && (
-                    <span className="clickable customTopMargin" onClick={() => openDetailClickHandler(-1)}>
-                         {AddIcon}
-                    </span>
-               )}
+               {/* The container for the menuBar */}
+               <div className="flex sticky w-screen bg-background/80 backdrop-blur-md gap-4 justify-between items-center px-4 py-6 z-10">
+                    {/* The screen title */}
+                    <div className="text-3xl md:text-4xl font-bold text-foreground w-full">
+                         Recents
+                    </div>
+                    {isLoggedIn && (
+                         <Button className="" onClick={() => openDetailClickHandler(-1)}>
+                              Add New <Plus className="ml-1 w-4 h-4" />
+                         </Button>
+                    )}
+               </div>
+               <div className="item-list p-4">
+                    <ul className="clickable grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5">
+                         {watchList
+                              ?.filter(
+                                   (currentWatchList: typeof IWatchList) =>
+                                        currentWatchList?.Archived === archivedVisible &&
+                                        (searchTerm === "" ||
+                                             (searchTerm !== "" &&
+                                                  currentWatchList?.WatchListItem.WatchListItemName.toLowerCase().includes(
+                                                       searchTerm
+                                                  ))) &&
+                                        ((stillWatching === false &&
+                                             (currentWatchList?.EndDate !== null ||
+                                                  (currentWatchList?.EndDate === null &&
+                                                       currentWatchList?.Archived === true))) ||
+                                             (stillWatching == true &&
+                                                  currentWatchList?.EndDate === null &&
+                                                  currentWatchList?.Archived === archivedVisible)) &&
+                                        (sourceFilter === "-1" ||
+                                             sourceFilter === null ||
+                                             (sourceFilter !== "-1" &&
+                                                  sourceFilter !== null &&
+                                                  String(currentWatchList?.WatchListSourceID) ===
+                                                  String(sourceFilter))) &&
+                                        (typeFilter === "-1" ||
+                                             (typeFilter !== "-1" &&
+                                                  String(currentWatchList?.WatchListTypeID) ===
+                                                  String(typeFilter)))
+                              )
+                              .map((currentWatchList: typeof IWatchList, index: number) => {
+                                   return (
+                                        <React.Fragment key={index}>
+                                             {watchListSortingComplete && (
+                                                  <li className="item-card shadow-md transition hover:scale-105" key={index}>
+                                                       {/* <span className="item-id">
+                      <div>{currentWatchList?.WatchListID}</div>
+                    </span> */}
 
-               <ul className="clickable show-list">
-                    {watchList?.filter(
-                         (currentWatchList: typeof IWatchList) =>
-                              currentWatchList?.Archived === archivedVisible &&
-                              (searchTerm === "" || (searchTerm !== "" && currentWatchList?.WatchListItem.WatchListItemName.toLowerCase().includes(searchTerm))) &&
-                              ((stillWatching === false && (currentWatchList?.EndDate !== null || (currentWatchList?.EndDate === null && currentWatchList?.Archived === true))) || (stillWatching == true && currentWatchList?.EndDate === null && currentWatchList?.Archived === archivedVisible)) &&
-                              (sourceFilter === "-1" || sourceFilter === null || (sourceFilter !== "-1" && sourceFilter !== null && String(currentWatchList?.WatchListSourceID) === String(sourceFilter))) &&
-                              (typeFilter === "-1" || (typeFilter !== "-1" && String(currentWatchList?.WatchListTypeID) === String(typeFilter))),
-                    )
-                         .map((currentWatchList: typeof IWatchList, index: number) => {
-                              return (
-                                   <React.Fragment key={index}>
-                                        {watchListSortingComplete && (
-                                             <li className="show-item" key={index}>
-                                                  <span className="item-id">
-                                                       <div>{currentWatchList?.WatchListID}</div>
-                                                  </span>
+                                                       <a
+                                                            className="show-link"
+                                                            onClick={() =>
+                                                                 openDetailClickHandler(currentWatchList?.WatchListID)
+                                                            }
+                                                       >
+                                                            <div className="">
+                                                                 {currentWatchList?.WatchListItem?.IMDB_Poster !==
+                                                                      null &&
+                                                                      currentWatchList?.IMDB_Poster_Error !== true && (
+                                                                           <img
+                                                                                alt={
+                                                                                     currentWatchList?.WatchListItem
+                                                                                          ?.WatchListItemName
+                                                                                }
+                                                                                src={currentWatchList?.WatchListItem?.IMDB_Poster}
+                                                                                onError={() =>
+                                                                                     showDefaultSrc(currentWatchList?.WatchListID)
+                                                                                }
+                                                                                className="aspect-[4/6]"
+                                                                           />
+                                                                      )}
 
-                                                  <a className="show-link" onClick={() => openDetailClickHandler(currentWatchList?.WatchListID)}>
-                                                       <div className="image-crop">
-                                                            {currentWatchList?.WatchListItem?.IMDB_Poster !== null && currentWatchList?.IMDB_Poster_Error !== true && <img alt={currentWatchList?.WatchListItem?.WatchListItemName} src={currentWatchList?.WatchListItem?.IMDB_Poster} onError={() => showDefaultSrc(currentWatchList?.WatchListID)} />}
+                                                                 {(currentWatchList?.WatchListItem?.IMDB_Poster ===
+                                                                      null ||
+                                                                      currentWatchList?.IMDB_Poster_Error === true) && (
+                                                                           <>{BrokenImageIcon}</>
+                                                                      )}
+                                                            </div>
+                                                       </a>
 
-                                                            {(currentWatchList?.WatchListItem?.IMDB_Poster === null || currentWatchList?.IMDB_Poster_Error === true) && <>{BrokenImageIcon}</>}
+                                                       <div className="text-center m-1 w-full">
+                                                            {typeof currentWatchList?.WatchListItem.IMDB_URL !==
+                                                                 "undefined" && (
+                                                                      <a
+                                                                           href={currentWatchList?.WatchListItem.IMDB_URL}
+                                                                           target="_blank"
+                                                                           className="font-medium"
+                                                                      >
+                                                                           {currentWatchList?.WatchListItem?.WatchListItemName}
+                                                                      </a>
+                                                                 )}
+
+                                                            {typeof currentWatchList?.WatchListItem?.IMDB_URL ===
+                                                                 "undefined" && (
+                                                                      <span>
+                                                                           {currentWatchList?.WatchListItem?.WatchListItemName}
+                                                                      </span>
+                                                                 )}
+
+                                                            {currentWatchList?.Archived === true ? (
+                                                                 <span>&nbsp;(A)</span>
+                                                            ) : (
+                                                                 <></>
+                                                            )}
                                                        </div>
-                                                  </a>
 
-                                                  <div className="show-title">
-                                                       {typeof currentWatchList?.WatchListItem.IMDB_URL !== "undefined" &&
-                                                            <a href={currentWatchList?.WatchListItem.IMDB_URL} target='_blank'>{currentWatchList?.WatchListItem?.WatchListItemName}</a>
-                                                       }
+                                                       {currentWatchList?.WatchListItem?.WatchListType
+                                                            ?.WatchListTypeID === 2 && (
+                                                                 <div>Season {currentWatchList?.Season}</div>
+                                                            )}
 
-                                                       {typeof currentWatchList?.WatchListItem?.IMDB_URL === "undefined" &&
-                                                            <span>
-                                                                 {currentWatchList?.WatchListItem?.WatchListItemName}
-                                                            </span>
-                                                       }
+                                                       <div className="text-sm w-full text-center text-muted-foreground">
+                                                            {currentWatchList?.StartDate}
+                                                            {currentWatchList?.EndDate !== null &&
+                                                                 currentWatchList?.EndDate !== currentWatchList?.StartDate
+                                                                 ? ` - ${currentWatchList?.EndDate}`
+                                                                 : ""}
+                                                       </div>
 
-                                                       {currentWatchList?.Archived === true ? <span>&nbsp;(A)</span> : <></>}
-                                                  </div>
-
-                                                  {currentWatchList?.WatchListItem?.WatchListType?.WatchListTypeID === 2 && <div>Season {currentWatchList?.Season}</div>}
-
-                                                  <div>
-                                                       {currentWatchList?.StartDate}
-                                                       {currentWatchList?.EndDate !== null && currentWatchList?.EndDate !== currentWatchList?.StartDate ? ` - ${currentWatchList?.EndDate}` : ""}
-                                                  </div>
-
-                                                  <div>
-                                                       {currentWatchList?.WatchListItem?.WatchListType?.WatchListTypeName}
-                                                  </div>
-
-                                                  <div>
-                                                       {currentWatchList?.WatchListSource?.WatchListSourceName}
-                                                  </div>
-
-                                                  {currentWatchList?.Rating !== null && (
                                                        <div>
-                                                            {currentWatchList?.Rating}/{ratingMax}
+                                                            {
+                                                                 currentWatchList?.WatchListItem?.WatchListType
+                                                                      ?.WatchListTypeName
+                                                            }
                                                        </div>
-                                                  )}
-                                             </li>
-                                        )}
-                                   </React.Fragment>
-                              );
-                         })}
-               </ul>
+
+                                                       <div>
+                                                            {currentWatchList?.WatchListSource?.WatchListSourceName}
+                                                       </div>
+
+                                                       {currentWatchList?.Rating !== null && (
+                                                            <div>
+                                                                 {currentWatchList?.Rating}/{ratingMax}
+                                                            </div>
+                                                       )}
+                                                  </li>
+                                             )}
+                                        </React.Fragment>
+                                   );
+                              })}
+                    </ul>
+               </div>
 
                {watchListDtlID !== null && (
                     <WatchListDetail
@@ -251,9 +349,7 @@ const WatchList = ({
 };
 
 WatchList.propTypes = exact({
-     AddIcon: PropTypes.object.isRequired,
      archivedVisible: PropTypes.bool.isRequired,
-     autoAdd: PropTypes.bool.isRequired,
      BrokenImageIcon: PropTypes.object.isRequired,
      CancelIcon: PropTypes.object.isRequired,
      demoMode: PropTypes.bool.isRequired,

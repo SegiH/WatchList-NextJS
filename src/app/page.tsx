@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 // NOTE: If you run this script in VS Code in Docker, you HAVE to run the web app on port 8080 or websocket will stop working which breaks hot reloading
 //
@@ -28,14 +28,16 @@ import TabParent from "./TabParent";
 
 import "./page.css";
 import { useCallback, useMemo } from "react";
+import { ModeToggle } from "@/components/mode-toggle";
+import { BarChart2, CircleUserRound, Cog, Film, HistoryIcon, Search, Settings2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ratingMax = 5;
 
 const AddIcon = require("@mui/icons-material/Add").default;
 const AddIconComponent = <AddIcon className="icon" />;
 
-const AdminConsoleIcon = require("@mui/icons-material/AdminPanelSettings").default;
-const AdminConsoleIconComponent = <AdminConsoleIcon />;
+const AdminConsoleIconComponent = <CircleUserRound className="w-6 h-6" />;
 
 const BrokenImageIcon = require("@mui/icons-material/BrokenImage").default;
 const BrokenImageIconComponent = <BrokenImageIcon className="brokenImage" />;
@@ -55,29 +57,26 @@ const SaveIconComponent = <SaveIcon />;
 const SearchIcon = require("@mui/icons-material/Search").default;
 const SearchIconComponent = <SearchIcon className="icon" />;
 
-const SettingsIcon = require("@mui/icons-material/Settings").default;
-const SettingsIconComponent = <SettingsIcon className="icon" />;
 
-const StatsIcon = require("@mui/icons-material/BarChart").default;
-const StatsIconComponent = <StatsIcon className="icon" />;
+const SettingsIconComponent = <Cog />;
 
-const WatchListIcon = require("@mui/icons-material/Movie").default;
-const WatchListIconComponent = <WatchListIcon className="icon" />;
+const StatsIconComponent = <BarChart2 className="w-6 h-6" />;
 
-const WatchListItemsIcon = require("@mui/icons-material/SmartDisplay").default;
-const WatchListItemsIconComponent = <WatchListItemsIcon className="icon" />;
+const WatchListIconComponent = <HistoryIcon className="w-6 h-6" />;
+
+const WatchListItemsIconComponent = <Film className="w-6 h-6" />;
 
 export default function Home() {
      const [activeRoute, setActiveRoute] = useState("");
      const [activeRouteDisplayName, setActiveRouteDisplayName] = useState("");
      const [archivedVisible, setArchivedVisible] = useState(false);
-     const [autoAdd, setAutoAdd] = useState(false);
      const [demoMode, setDemoMode] = useState(false);
      const [isAdding, setIsAdding] = useState(false);
      const [isEditing, setIsEditing] = useState(false);
      const [isLoggedIn, setIsLoggedIn] = useState(false);
      const [isLoggedInCheckComplete, setIsLoggedInCheckComplete] = useState(false);
      const [isLoggedInCheckStarted, setIsLoggedInCheckStarted] = useState(false);
+     const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);  // State to control the opening of the dialog
      const [loginVisible, setLoginVisible] = useState(false);
      const [searchCount, setSearchCount] = useState(5);
      const [searchTerm, setSearchTerm] = useState("");
@@ -88,27 +87,41 @@ export default function Home() {
      const [sourceFilter, setSourceFilter] = useState("-1");
      const [typeFilter, setTypeFilter] = useState("-1");
      const [stillWatching, setStillWatching] = useState(true);
-     const [userData, setUserData] = useState({ UserID: 0, Username: "", RealName: "", Admin: false }); // cannot use iUserEmpty() here
+     const [userData, setUserData] = useState({
+          UserID: 0,
+          Username: "",
+          RealName: "",
+          Admin: false,
+     }); // cannot use iUserEmpty() here
 
      const [watchList, setWatchList] = useState([]);
      const [watchListLoadingStarted, setWatchListLoadingStarted] = useState(false);
-     const [watchListLoadingComplete, setWatchListLoadingComplete] = useState(false);
-     const [watchListSortingComplete, setWatchListSortingComplete] = useState(false);
+     const [watchListLoadingComplete, setWatchListLoadingComplete] =
+          useState(false);
+     const [watchListSortingComplete, setWatchListSortingComplete] =
+          useState(false);
 
      const [watchListItems, setWatchListItems] = useState([]);
-     const [watchListItemsLoadingStarted, setWatchListItemsLoadingStarted] = useState(false);
-     const [watchListItemsLoadingComplete, setWatchListItemsLoadingComplete] = useState(false);
-     const [watchListItemsSortingComplete, setWatchListItemsSortingComplete] = useState(false);
+     const [watchListItemsLoadingStarted, setWatchListItemsLoadingStarted] =
+          useState(false);
+     const [watchListItemsLoadingComplete, setWatchListItemsLoadingComplete] =
+          useState(false);
+     const [watchListItemsSortingComplete, setWatchListItemsSortingComplete] =
+          useState(false);
 
      const [newWatchListItemDtlID, setNewWatchListItemDtlID] = useState(null); // After adding a new WLI, This will hold the new ID so it can be passed to WatchList and add a new record based on this WLI ID
 
      const [watchListSources, setWatchListSources] = useState([]);
-     const [watchListSourcesLoadingStarted, setWatchListSourcesLoadingStarted] = useState(false);
-     const [watchListSourcesLoadingComplete, setWatchListSourcesLoadingComplete] = useState(false);
+     const [watchListSourcesLoadingStarted, setWatchListSourcesLoadingStarted] =
+          useState(false);
+     const [watchListSourcesLoadingComplete, setWatchListSourcesLoadingComplete] =
+          useState(false);
 
      const [watchListTypes, setWatchListTypes] = useState([]);
-     const [watchListTypesLoadingStarted, setWatchListTypesLoadingStarted] = useState(false);
-     const [watchListTypesLoadingComplete, setWatchListTypesLoadingComplete] = useState(false);
+     const [watchListTypesLoadingStarted, setWatchListTypesLoadingStarted] =
+          useState(false);
+     const [watchListTypesLoadingComplete, setWatchListTypesLoadingComplete] =
+          useState(false);
 
      const [watchListSortColumn, setWatchListSortColumn] = useState("Name");
      const [watchListSortDirection, setWatchListSortDirection] = useState("ASC");
@@ -127,8 +140,8 @@ export default function Home() {
      const watchListItemsSortColumns = useMemo(() => {
           return {
                ID: "ID",
-               Name: "Name"
-          }
+               Name: "Name",
+          };
      }, []);
 
      const generateRandomPassword = () => {
@@ -136,15 +149,19 @@ export default function Home() {
           const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
           const digitChars = "0123456789";
           const specialChars = "!@#$%^&*";
-          const allChars = lowercaseChars + uppercaseChars + digitChars + specialChars;
+          const allChars =
+               lowercaseChars + uppercaseChars + digitChars + specialChars;
 
           let randomString = "";
 
           // Add one character from each character set to satisfy the regex
-          randomString += lowercaseChars[Math.floor(Math.random() * lowercaseChars.length)];
-          randomString += uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)];
+          randomString +=
+               lowercaseChars[Math.floor(Math.random() * lowercaseChars.length)];
+          randomString +=
+               uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)];
           randomString += digitChars[Math.floor(Math.random() * digitChars.length)];
-          randomString += specialChars[Math.floor(Math.random() * specialChars.length)];
+          randomString +=
+               specialChars[Math.floor(Math.random() * specialChars.length)];
 
           // Fill the rest of the string with random characters
           while (randomString.length < 8) {
@@ -176,7 +193,8 @@ export default function Home() {
                return;
           }
 
-          axios.get(`/api/SignOut`)
+          axios
+               .get(`/api/SignOut`)
                .then((res: typeof IUser) => {
                     if (res.data[0] === "OK") {
                          signOutActions();
@@ -227,14 +245,19 @@ export default function Home() {
 
           setSettingsVisible(false);
 
-          localStorage.removeItem("watchlist_demomode")
+          localStorage.removeItem("watchlist_demomode");
 
           setActiveRoute("Login");
-     }
+     };
+
+     // Function to toggle the dialog's open state
+     const toggleSearchDialog = () => setIsSearchDialogOpen(!isSearchDialogOpen);
 
      const validatePassword = (value: string) => {
           // 1 lowercase alphabetical character, 1 uppercase alphabetical character, 1 numeric, 1 special char, 8 chars long minimum
-          const strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})");
+          const strongRegex = new RegExp(
+               "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
+          );
 
           return strongRegex.test(value);
      };
@@ -244,22 +267,26 @@ export default function Home() {
           setIsLoggedInCheckStarted(true);
 
           if (!isLoggedIn && !isLoggedInCheckStarted) {
-               const newArchivedVisible = localStorage.getItem("WatchList.ArchivedVisible");
-               const newAutoAdd = localStorage.getItem("WatchList.AutoAdd");
+               const newArchivedVisible = localStorage.getItem(
+                    "WatchList.ArchivedVisible"
+               );
+
                const newSearchCount = localStorage.getItem("WatchList.SearchCount");
                const newStillWatching = localStorage.getItem("WatchList.StillWatching");
-               const newShowMissingArtwork = localStorage.getItem("WatchList.ShowMissingArtwork");
+               const newShowMissingArtwork = localStorage.getItem(
+                    "WatchList.ShowMissingArtwork"
+               );
                const newSourceFilter = localStorage.getItem("WatchList.SourceFilter");
                const newTypeFilter = localStorage.getItem("WatchList.TypeFilter");
-               const newSortColumn = localStorage.getItem("WatchList.WatchListSortColumn");
-               const newSortDirection = localStorage.getItem("WatchList.WatchListSortDirection");
+               const newSortColumn = localStorage.getItem(
+                    "WatchList.WatchListSortColumn"
+               );
+               const newSortDirection = localStorage.getItem(
+                    "WatchList.WatchListSortDirection"
+               );
 
                if (newArchivedVisible !== null) {
                     setArchivedVisible(newArchivedVisible === "true" ? true : false);
-               }
-
-               if (newAutoAdd !== null) {
-                    setAutoAdd(newAutoAdd === "true" ? true : false);
                }
 
                if (newSearchCount !== null) {
@@ -314,7 +341,8 @@ export default function Home() {
                     return;
                }
 
-               axios.get(`/api/IsLoggedIn`)
+               axios
+                    .get(`/api/IsLoggedIn`)
                     .then((res: typeof IUser) => {
                          if (res.data[0] === "OK") {
                               const newUserData = Object.assign({}, userData);
@@ -342,7 +370,11 @@ export default function Home() {
                          setIsLoggedInCheckComplete(true);
                     })
                     .catch((err: Error) => {
-                         alert(new Date().toTimeString() + ": Error when calling /IsLoggedIn with the error " + err.message);
+                         alert(
+                              new Date().toTimeString() +
+                              ": Error when calling /IsLoggedIn with the error " +
+                              err.message
+                         );
                          setIsLoggedInCheckComplete(true);
                          setLoginVisible(true);
                     });
@@ -370,7 +402,11 @@ export default function Home() {
           if (!watchListLoadingStarted && !watchListLoadingComplete) {
                setWatchListLoadingStarted(true);
 
-               axios.get(`/api/GetWatchList?SortColumn=${watchListSortColumn}&SortDirection=${watchListSortDirection}`, { withCredentials: true })
+               axios
+                    .get(
+                         `/api/GetWatchList?SortColumn=${watchListSortColumn}&SortDirection=${watchListSortDirection}`,
+                         { withCredentials: true }
+                    )
                     .then((res: typeof IWatchList) => {
                          setWatchList(res.data);
                          setWatchListLoadingComplete(true);
@@ -379,14 +415,23 @@ export default function Home() {
                          alert("Failed to get WatchList with the error " + err.message);
                     });
           }
-     }, [isLoggedInCheck, isLoggedIn, userData, watchListLoadingStarted, watchListLoadingComplete, watchListSortColumn, watchListSortDirection]);
+     }, [
+          isLoggedInCheck,
+          isLoggedIn,
+          userData,
+          watchListLoadingStarted,
+          watchListLoadingComplete,
+          watchListSortColumn,
+          watchListSortDirection,
+     ]);
 
      // Get WatchListItems
      useEffect(() => {
           if (!isLoggedInCheck()) return;
 
           if (demoMode) {
-               const demoWatchListItemsPayload = require("./demo/index").demoWatchListItemsPayload;
+               const demoWatchListItemsPayload =
+                    require("./demo/index").demoWatchListItemsPayload;
 
                setWatchListItems(demoWatchListItemsPayload);
                setWatchListItemsLoadingStarted(true);
@@ -395,16 +440,27 @@ export default function Home() {
                return;
           }
 
-          if (watchListLoadingComplete && !watchListItemsLoadingStarted && !watchListItemsLoadingComplete) {
+          if (
+               watchListLoadingComplete &&
+               !watchListItemsLoadingStarted &&
+               !watchListItemsLoadingComplete
+          ) {
                setWatchListItemsLoadingStarted(true);
 
-               axios.get(`/api/GetWatchListItems${Object.keys(watchListItemsSortColumns).includes(watchListSortColumn) ? `?SortColumn=${watchListSortColumn}&SortDirection=${watchListSortDirection}` : ``}`, { withCredentials: true })
+               axios
+                    .get(
+                         `/api/GetWatchListItems${Object.keys(watchListItemsSortColumns).includes(watchListSortColumn)
+                              ? `?SortColumn=${watchListSortColumn}&SortDirection=${watchListSortDirection}`
+                              : ``
+                         }`,
+                         { withCredentials: true }
+                    )
                     .then((res: typeof IWatchListItem) => {
                          setWatchListItems(res.data);
                          setWatchListItemsLoadingComplete(true);
                          setWatchListItemsSortingComplete(false);
 
-                         if (autoAdd && newWatchListItemDtlID !== null) {
+                         if (newWatchListItemDtlID !== null) {
                               setActiveRoute(defaultRoute);
                          }
                     })
@@ -412,14 +468,26 @@ export default function Home() {
                          alert("Failed to get WatchList Items with the error " + err.message);
                     });
           }
-     }, [autoAdd, isLoggedInCheck, isLoggedInCheckComplete, isLoggedIn, newWatchListItemDtlID, watchListLoadingComplete, watchListItemsLoadingStarted, watchListItemsLoadingComplete, watchListItemsSortColumns, watchListSortColumn, watchListSortDirection]);
+     }, [
+          isLoggedInCheck,
+          isLoggedInCheckComplete,
+          isLoggedIn,
+          newWatchListItemDtlID,
+          watchListLoadingComplete,
+          watchListItemsLoadingStarted,
+          watchListItemsLoadingComplete,
+          watchListItemsSortColumns,
+          watchListSortColumn,
+          watchListSortDirection,
+     ]);
 
      // Get WatchListSources
      useEffect(() => {
           if (!isLoggedInCheck()) return;
 
           if (demoMode) {
-               const demoWatchListSourcesPayload = require("./demo/index").demoWatchListSources;
+               const demoWatchListSourcesPayload =
+                    require("./demo/index").demoWatchListSources;
 
                setWatchListSources(demoWatchListSourcesPayload);
                setWatchListSourcesLoadingStarted(true);
@@ -428,33 +496,50 @@ export default function Home() {
                return;
           }
 
-          if (watchListItemsLoadingComplete && !watchListSourcesLoadingStarted && !watchListSourcesLoadingComplete) {
+          if (
+               watchListItemsLoadingComplete &&
+               !watchListSourcesLoadingStarted &&
+               !watchListSourcesLoadingComplete
+          ) {
                setWatchListSourcesLoadingStarted(true);
 
-               axios.get(`/api/GetWatchListSources`, { withCredentials: true })
+               axios
+                    .get(`/api/GetWatchListSources`, { withCredentials: true })
                     .then((res: typeof IWatchListSource) => {
-                         res.data.sort((a: typeof IWatchListSource, b: typeof IWatchListSource) => {
-                              const aName = a.WatchListSourceName;
-                              const bName = b.WatchListSourceName;
+                         res.data.sort(
+                              (a: typeof IWatchListSource, b: typeof IWatchListSource) => {
+                                   const aName = a.WatchListSourceName;
+                                   const bName = b.WatchListSourceName;
 
-                              return String(aName) > String(bName) ? 1 : -1;
-                         });
+                                   return String(aName) > String(bName) ? 1 : -1;
+                              }
+                         );
 
                          setWatchListSources(res.data);
                          setWatchListSourcesLoadingComplete(true);
                     })
                     .catch((err: Error) => {
-                         alert("Failed to get WatchList Sources with the error " + err.message);
+                         alert(
+                              "Failed to get WatchList Sources with the error " + err.message
+                         );
                     });
           }
-     }, [isLoggedInCheck, isLoggedInCheckComplete, isLoggedIn, watchListItemsLoadingComplete, watchListSourcesLoadingStarted, watchListSourcesLoadingComplete]);
+     }, [
+          isLoggedInCheck,
+          isLoggedInCheckComplete,
+          isLoggedIn,
+          watchListItemsLoadingComplete,
+          watchListSourcesLoadingStarted,
+          watchListSourcesLoadingComplete,
+     ]);
 
      // Get WatchListTypes
      useEffect(() => {
           if (!isLoggedInCheck()) return;
 
           if (demoMode) {
-               const demoWatchListTypesPayload = require("./demo/index").demoWatchListTypes;
+               const demoWatchListTypesPayload =
+                    require("./demo/index").demoWatchListTypes;
 
                setWatchListTypes(demoWatchListTypesPayload);
                setWatchListTypesLoadingStarted(true);
@@ -463,10 +548,15 @@ export default function Home() {
                return;
           }
 
-          if (watchListSourcesLoadingComplete && !watchListTypesLoadingStarted && !watchListTypesLoadingComplete) {
+          if (
+               watchListSourcesLoadingComplete &&
+               !watchListTypesLoadingStarted &&
+               !watchListTypesLoadingComplete
+          ) {
                setWatchListTypesLoadingStarted(true);
 
-               axios.get(`/api/GetWatchListTypes`, { withCredentials: true })
+               axios
+                    .get(`/api/GetWatchListTypes`, { withCredentials: true })
                     .then((res: typeof IWatchListType) => {
                          setWatchListTypes(res.data);
                          setWatchListTypesLoadingComplete(true);
@@ -475,7 +565,14 @@ export default function Home() {
                          alert("Failed to get WatchList Types with the error " + err.message);
                     });
           }
-     }, [isLoggedInCheck, isLoggedInCheckComplete, isLoggedIn, watchListSourcesLoadingComplete, watchListTypesLoadingStarted, watchListTypesLoadingComplete]);
+     }, [
+          isLoggedInCheck,
+          isLoggedInCheckComplete,
+          isLoggedIn,
+          watchListSourcesLoadingComplete,
+          watchListTypesLoadingStarted,
+          watchListTypesLoadingComplete,
+     ]);
 
      // Save preferences
      useEffect(() => {
@@ -484,31 +581,41 @@ export default function Home() {
           }
 
           localStorage.setItem("WatchList.ArchivedVisible", archivedVisible);
-          localStorage.setItem("WatchList.AutoAdd", autoAdd);
           localStorage.setItem("WatchList.SearchCount", searchCount);
           localStorage.setItem("WatchList.ShowMissingArtwork", showMissingArtwork);
           localStorage.setItem("WatchList.SourceFilter", sourceFilter);
           localStorage.setItem("WatchList.StillWatching", stillWatching);
           localStorage.setItem("WatchList.TypeFilter", typeFilter);
           localStorage.setItem("WatchList.WatchListSortColumn", watchListSortColumn);
-          localStorage.setItem("WatchList.WatchListSortDirection", watchListSortDirection);
+          localStorage.setItem(
+               "WatchList.WatchListSortDirection",
+               watchListSortDirection
+          );
 
           setWatchListSortingComplete(false);
           setWatchListItemsSortingComplete(false);
-     }, [archivedVisible, autoAdd, isLoggedIn, searchCount, showMissingArtwork, stillWatching, sourceFilter, typeFilter, watchListSortColumn, watchListSortDirection]);
+     }, [
+          archivedVisible,
+          isLoggedIn,
+          searchCount,
+          showMissingArtwork,
+          stillWatching,
+          sourceFilter,
+          typeFilter,
+          watchListSortColumn,
+          watchListSortDirection,
+     ]);
 
      const routeList = {
           WatchList: {
                Name: "WatchList",
-               DisplayName: "WatchList",
+               DisplayName: "Recents",
                Path: "/WatchList",
                Icon: WatchListIconComponent,
                RequiresAuth: true,
                Component: (
                     <WatchList
-                         AddIcon={AddIconComponent}
                          archivedVisible={archivedVisible}
-                         autoAdd={autoAdd}
                          BrokenImageIcon={BrokenImageIconComponent}
                          isAdding={isAdding}
                          CancelIcon={CancelIconComponent}
@@ -542,64 +649,63 @@ export default function Home() {
                     />
                ),
           },
-          WatchListItems: {
-               Name: "WatchListItems",
-               DisplayName: "Items",
-               Path: "/WatchListItems",
-               Icon: WatchListItemsIconComponent,
-               RequiresAuth: true,
-               Component: (
-                    <WatchListItems
-                         AddIcon={AddIconComponent}
-                         archivedVisible={archivedVisible}
-                         BrokenImageIcon={BrokenImageIconComponent}
-                         CancelIcon={CancelIconComponent}
-                         demoMode={demoMode}
-                         EditIcon={EditIconComponent}
-                         isAdding={isAdding}
-                         isEditing={isEditing}
-                         SaveIcon={SaveIconComponent}
-                         searchTerm={searchTerm}
-                         setIsAdding={setIsAdding}
-                         setIsEditing={setIsEditing}
-                         setNewWatchListItemDtlID={setNewWatchListItemDtlID}
-                         setWatchListItems={setWatchListItems}
-                         setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
-                         setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
-                         setWatchListItemsSortingComplete={setWatchListItemsSortingComplete}
-                         setWatchListLoadingComplete={setWatchListLoadingComplete}
-                         setWatchListLoadingStarted={setWatchListLoadingStarted}
-                         showMissingArtwork={showMissingArtwork}
-                         typeFilter={typeFilter}
-                         watchListCount={watchList.length}
-                         watchListItems={watchListItems}
-                         watchListItemsLoadingComplete={watchListItemsLoadingComplete}
-                         watchListSortColumn={watchListSortColumn}
-                         watchListSortDirection={watchListSortDirection}
-                         watchListItemsSortingComplete={watchListItemsSortingComplete}
-                         watchListTypes={watchListTypes}
-                    />
-               ),
-          },
-          /*SearchIMDB: {
-               Name: "SearchIMDB",
-               DisplayName: "Search",
-               Path: "/SearchIMDB",
-               Icon: SearchIconComponent,
-               RequiresAuth: true,
-               Component: (
-                    <SearchIMDB
-                         AddIcon={AddIconComponent}
-                         autoAdd={autoAdd}
-                         BrokenImageIcon={BrokenImageIconComponent}
-                         searchCount={searchCount}
-                         SearchIcon={SearchIconComponent}
-                         setNewWatchListItemDtlID={setNewWatchListItemDtlID}
-                         setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
-                         setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
-                    />
-               ),
+          /*WatchListItems: {
+            Name: "WatchListItems",
+            DisplayName: "My List",
+            Path: "/WatchListItems",
+            Icon: WatchListItemsIconComponent,
+            RequiresAuth: true,
+            Component: (
+              <WatchListItems
+                AddIcon={AddIconComponent}
+                archivedVisible={archivedVisible}
+                BrokenImageIcon={BrokenImageIconComponent}
+                CancelIcon={CancelIconComponent}
+                demoMode={demoMode}
+                EditIcon={EditIconComponent}
+                isAdding={isAdding}
+                isEditing={isEditing}
+                SaveIcon={SaveIconComponent}
+                searchTerm={searchTerm}
+                setIsAdding={setIsAdding}
+                setIsEditing={setIsEditing}
+                setNewWatchListItemDtlID={setNewWatchListItemDtlID}
+                setWatchListItems={setWatchListItems}
+                setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
+                setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
+                setWatchListItemsSortingComplete={setWatchListItemsSortingComplete}
+                setWatchListLoadingComplete={setWatchListLoadingComplete}
+                setWatchListLoadingStarted={setWatchListLoadingStarted}
+                showMissingArtwork={showMissingArtwork}
+                typeFilter={typeFilter}
+                watchListCount={watchList.length}
+                watchListItems={watchListItems}
+                watchListItemsLoadingComplete={watchListItemsLoadingComplete}
+                watchListSortColumn={watchListSortColumn}
+                watchListSortDirection={watchListSortDirection}
+                watchListItemsSortingComplete={watchListItemsSortingComplete}
+                watchListTypes={watchListTypes}
+              />
+            ),
           },*/
+          /*SearchIMDB: {
+                     Name: "SearchIMDB",
+                     DisplayName: "Search",
+                     Path: "/SearchIMDB",
+                     Icon: SearchIconComponent,
+                     RequiresAuth: true,
+                     Component: (
+                          <SearchIMDB
+                               AddIcon={AddIconComponent}
+                               BrokenImageIcon={BrokenImageIconComponent}
+                               searchCount={searchCount}
+                               SearchIcon={SearchIconComponent}
+                               setNewWatchListItemDtlID={setNewWatchListItemDtlID}
+                               setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
+                               setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
+                          />
+                     ),
+                },*/
           WatchListStats: {
                Name: "WatchListStats",
                DisplayName: "Stats",
@@ -613,7 +719,7 @@ export default function Home() {
                          isLoggedInCheckComplete={isLoggedInCheckComplete}
                          ratingMax={ratingMax}
                     />
-               )
+               ),
           },
           AdminConsole: {
                Name: "AdminConsole",
@@ -630,7 +736,9 @@ export default function Home() {
                          SaveIcon={SaveIcon}
                          setWatchListSources={setWatchListSources}
                          setWatchListSourcesLoadingStarted={setWatchListSourcesLoadingStarted}
-                         setWatchListSourcesLoadingComplete={setWatchListSourcesLoadingComplete}
+                         setWatchListSourcesLoadingComplete={
+                              setWatchListSourcesLoadingComplete
+                         }
                          setWatchListTypes={setWatchListTypes}
                          setWatchListTypesLoadingStarted={setWatchListTypesLoadingStarted}
                          setWatchListTypesLoadingComplete={setWatchListTypesLoadingComplete}
@@ -638,7 +746,7 @@ export default function Home() {
                          watchListSources={watchListSources}
                          watchListTypes={watchListTypes}
                     />
-               )
+               ),
           },
           Login: {
                Name: "Login",
@@ -656,95 +764,121 @@ export default function Home() {
                          setIsLoggedInCheckComplete={setIsLoggedInCheckComplete}
                          setUserData={setUserData}
                     />
-               )
-          }
+               ),
+          },
      };
 
      return (
           <>
-               {isLoggedIn && watchListSourcesLoadingComplete && watchListTypesLoadingComplete &&
-                    <>
+               <div className="flex justify-between items-center px-4 py-2 w-full border-b border-border">
+
+                    <div className="text-xl font-bold text-foreground">
+                         Watch<span className="text-muted-foreground">List</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                         <SearchIMDB
+                              // DOESNT APPEAR TO BE USED IN SEARCHIMDB isDialogOpen={isSearchDialogOpen}
+                              // DOESNT APPEAR TO BE USED IN SEARCHIMDB setIsDialogOpen={setIsSearchDialogOpen}
+                              BrokenImageIcon={BrokenImageIconComponent}
+                              searchCount={searchCount}
+                              setActiveRoute={setActiveRoute}
+                              setNewWatchListItemDtlID={setNewWatchListItemDtlID}
+                              setSearchVisible={setSearchVisible}
+                              setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
+                              setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
+                              watchListItems={watchListItems}
+                         />
+
+                         <span className="clickable" >
+                              <Button variant="outline" size="icon" onClick={toggleSearchDialog}>
+                                   <Settings2 onClick={() => setSettingsVisible(true)} />
+                              </Button>
+                         </span>
+                         <ModeToggle />
+                    </div>
+               </div>
+
+               {isLoggedIn &&
+                    watchListSourcesLoadingComplete &&
+                    watchListTypesLoadingComplete && (
                          <>
-                              <span className="menuBar">
-                                   <span className="leftMargin menuBarActiveRoute">{activeRouteDisplayName}</span>
-
-                                   <span className="options">
-                                        <span className="clickable searchIcon" onClick={showSearch}>
-                                             {SearchIconComponent}
-                                        </span>
-
-                                        <span className="clickable" onClick={showSettings}>
-                                             {SettingsIconComponent}
-                                        </span>
-                                   </span>
-                              </span>
-
-                              <TabParent activeRoute={activeRoute} admin={userData.Admin} defaultRoute={defaultRoute} isLoggedIn={isLoggedIn} isLoggedInCheckComplete={isLoggedInCheckComplete} routeList={routeList} setActiveRoute={setActiveRoute} setActiveRouteDisplayName={setActiveRouteDisplayName} />
-                         </>
-
-                         {searchVisible &&
-                              <SearchIMDB
-                                   AddIcon={AddIconComponent}
-                                   autoAdd={autoAdd}
-                                   BrokenImageIcon={BrokenImageIconComponent}
-                                   searchCount={searchCount}
-                                   searchVisible={searchVisible}
-                                   setNewWatchListItemDtlID={setNewWatchListItemDtlID}
-                                   setSearchVisible={setSearchVisible}
-                                   setWatchListItemsLoadingStarted={setWatchListItemsLoadingStarted}
-                                   setWatchListItemsLoadingComplete={setWatchListItemsLoadingComplete}
-                              />
-                         }
-
-                         {settingsVisible &&
-                              <Settings
-                                   activeRoute={activeRoute}
-                                   archivedVisible={archivedVisible}
-                                   autoAdd={autoAdd}
-                                   isLoggedIn={isLoggedIn}
-                                   LogOutIconComponent={LogOutIconComponent}
-                                   searchCount={searchCount}
-                                   searchTerm={searchTerm}
-                                   setAutoAdd={setAutoAdd}
-                                   setSearchTerm={setSearchTerm}
-                                   setSettingsVisible={setSettingsVisible}
-                                   stillWatching={stillWatching}
-                                   setArchivedVisible={setArchivedVisible}
-                                   setSearchCount={setSearchCount}
-                                   setShowMissingArtwork={setShowMissingArtwork}
-                                   setSourceFilter={setSourceFilter}
-                                   setStillWatching={setStillWatching}
-                                   setTypeFilter={setTypeFilter}
-                                   setWatchListSortColumn={setWatchListSortColumn}
-                                   setWatchListSortDirection={setWatchListSortDirection}
-                                   showMissingArtwork={showMissingArtwork}
-                                   signOut={signOut}
-                                   sourceFilter={sourceFilter}
-                                   typeFilter={typeFilter}
-                                   watchListItemsSortColumns={watchListItemsSortColumns}
-                                   watchListSortColumn={watchListSortColumn}
-                                   watchListSortColumns={watchListSortColumns}
-                                   watchListSortDirection={watchListSortDirection}
-                                   watchListSources={watchListSources}
-                                   watchListTypes={watchListTypes}
-                              />
-                         }
-                    </>
-               }
-
-               {!isLoggedIn &&
-                    <>
-                         {loginVisible && !setupVisible &&
                               <>
-                                   {routeList["Login"].Component}
-                              </>
-                         }
 
-                         {setupVisible && !loginVisible &&
-                              <Setup demoUsername={demoUsername} setSetupVisible={setSetupVisible} validatePassword={validatePassword} />
-                         }
+
+                                   <TabParent
+                                        activeRoute={activeRoute}
+                                        admin={userData.Admin}
+                                        defaultRoute={defaultRoute}
+                                        isLoggedIn={isLoggedIn}
+                                        isLoggedInCheckComplete={isLoggedInCheckComplete}
+                                        routeList={routeList}
+                                        setActiveRoute={setActiveRoute}
+                                        setActiveRouteDisplayName={setActiveRouteDisplayName}
+                                   />
+                              </>
+
+                              {/*{searchVisible && (
+              <SearchIMDB
+                BrokenImageIcon={BrokenImageIconComponent}
+                searchCount={searchCount}
+                setNewWatchListItemDtlID={setNewWatchListItemDtlID}
+                setSearchVisible={setSearchVisible}
+                setWatchListItemsLoadingStarted={
+                  setWatchListItemsLoadingStarted
+                }
+                setWatchListItemsLoadingComplete={
+                  setWatchListItemsLoadingComplete
+                }
+              />
+              )}*/}
+
+                              {settingsVisible && (
+                                   <Settings
+                                        activeRoute={activeRoute}
+                                        archivedVisible={archivedVisible}
+                                        isLoggedIn={isLoggedIn}
+                                        LogOutIconComponent={LogOutIconComponent}
+                                        searchCount={searchCount}
+                                        searchTerm={searchTerm}
+                                        setSearchTerm={setSearchTerm}
+                                        setSettingsVisible={setSettingsVisible}
+                                        stillWatching={stillWatching}
+                                        setArchivedVisible={setArchivedVisible}
+                                        setSearchCount={setSearchCount}
+                                        setShowMissingArtwork={setShowMissingArtwork}
+                                        setSourceFilter={setSourceFilter}
+                                        setStillWatching={setStillWatching}
+                                        setTypeFilter={setTypeFilter}
+                                        setWatchListSortColumn={setWatchListSortColumn}
+                                        setWatchListSortDirection={setWatchListSortDirection}
+                                        showMissingArtwork={showMissingArtwork}
+                                        signOut={signOut}
+                                        sourceFilter={sourceFilter}
+                                        typeFilter={typeFilter}
+                                        watchListItemsSortColumns={watchListItemsSortColumns}
+                                        watchListSortColumn={watchListSortColumn}
+                                        watchListSortColumns={watchListSortColumns}
+                                        watchListSortDirection={watchListSortDirection}
+                                        watchListSources={watchListSources}
+                                        watchListTypes={watchListTypes}
+                                   />
+                              )}
+                         </>
+                    )}
+
+               {!isLoggedIn && (
+                    <>
+                         {loginVisible && !setupVisible && <>{routeList["Login"].Component}</>}
+
+                         {setupVisible && !loginVisible && (
+                              <Setup
+                                   demoUsername={demoUsername}
+                                   setSetupVisible={setSetupVisible}
+                                   validatePassword={validatePassword}
+                              />
+                         )}
                     </>
-               }
+               )}
           </>
-     )
+     );
 }

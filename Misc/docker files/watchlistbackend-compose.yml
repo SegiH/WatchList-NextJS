@@ -15,7 +15,7 @@ services:
         ports:
             - 8080:8080
         volumes:
-            - /path/to/watchlistdb.sqlite:/watchlistdb.sqlite
+            - /path/to/watchlistdb.sqlite:/watchlistdb.sqlite.demo
         networks:
             - default
         restart: always
